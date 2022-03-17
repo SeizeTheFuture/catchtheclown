@@ -1,5 +1,6 @@
 import pygame
 import random
+import clown
 
 # Initialize pygame
 pygame.init()
@@ -16,15 +17,8 @@ clock = pygame.time.Clock()
 
 # Set game values
 PLAYER_STARTING_LIVES = 5
-CLOWN_STARTING_VELOCITY = 3
-CLOWN_ACCELERATION = .5
-
 score = 0
 player_lives = PLAYER_STARTING_LIVES
-
-clown_velocity = CLOWN_STARTING_VELOCITY
-clown_dx = random.choice([-1, 1])
-clown_dy = random.choice([-1, 1])
 
 # Set colors
 BLUE = (26, 130, 167)
@@ -70,9 +64,8 @@ background_rect.topleft = (-700, -400)
 # Background Attribution
 # <a href="https://www.freepik.com/vectors/cirque">Cirque vector created by vectorpouch - www.freepik.com</a>
 
-clown_image = pygame.image.load("clown.png")
-clown_rect = clown_image.get_rect()
-clown_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
+# Create clown object
+clown = clown.Clown()
 
 # The main game loop
 pygame.mixer.music.play(-1, 0, 0)
@@ -89,28 +82,21 @@ while running:
             mouse_y = event.pos[1]
 
             # The clown was clicked
-            if clown_rect.collidepoint(mouse_x, mouse_y):
+            if clown.clown_rect.collidepoint(mouse_x, mouse_y):
                 click_sound.play()
                 score += 1
-                clown_velocity += CLOWN_ACCELERATION
-                previous_directions = (clown_dx, clown_dy)
-                while previous_directions == (clown_dx, clown_dy):
-                    clown_dx = random.choice([-1, 1])
-                    clown_dy = random.choice([-1, 1])
+                clown.clown_velocity += clown.CLOWN_ACCELERATION
+                previous_directions = (clown.clown_dx, clown.clown_dy)
+                while previous_directions == (clown.clown_dx, clown.clown_dy):
+                    clown.clown_dx = random.choice([-1, 1])
+                    clown.clown_dy = random.choice([-1, 1])
             # The clown was missed
             else:
                 miss_sound.play()
                 player_lives -= 1
 
-    # Move the clown
-    clown_rect.x += clown_dx * clown_velocity
-    clown_rect.y += clown_dy * clown_velocity
-
-    # Bounce the clown off the edges of the display
-    if clown_rect.right >= WINDOW_WIDTH or clown_rect.left <= 0:
-        clown_dx *= -1
-    if clown_rect.top <= 0 or clown_rect.bottom >= WINDOW_HEIGHT:
-        clown_dy *= -1
+    # Move clown
+    clown.move()
 
     # Blit Background
     display_surface.blit(background_image, background_rect)
@@ -142,14 +128,14 @@ while running:
                     is_paused = False
                     score = 0
                     player_lives = 5
-                    clown_velocity = CLOWN_STARTING_VELOCITY
-                    clown_dx = random.choice([-1, 1])
-                    clown_dy = random.choice([-1, 1])
-                    clown_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
+                    clown.clown_velocity = clown.CLOWN_STARTING_VELOCITY
+                    clown.clown_dx = random.choice([-1, 1])
+                    clown.clown_dy = random.choice([-1, 1])
+                    clown.clown_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
                     pygame.mixer.music.play(-1, 0, 0)
 
     # Blit Assets
-    display_surface.blit(clown_image, clown_rect)
+    display_surface.blit(clown.clown_image, clown.clown_rect)
 
     # Update display and tick clock
     pygame.display.update()
